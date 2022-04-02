@@ -15,13 +15,13 @@
 
 #define BRICK_POS_X            0
 #define BRICK_POS_Y            300
-#define BRICK_WIDTH            50.0f
+#define BRICK_WIDTH            10.0f
 #define BRICK_HEIGHT        100.0f
 #define BRICK_WAIT            1.5f
 
 #define BRICK_CPU_POS_X            800
 #define BRICK_CPU_POS_Y            300
-#define BRICK_CPU_WIDTH            50.0f
+#define BRICK_CPU_WIDTH            10.0f
 #define BRICK_CPU_HEIGHT        100.0f
 #define BRICK_CPU_WAIT            1.5f
 

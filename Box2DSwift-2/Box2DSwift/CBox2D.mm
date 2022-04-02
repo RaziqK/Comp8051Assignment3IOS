@@ -60,6 +60,8 @@ public:
     bool ballHitBrick;
     bool ballHitBrickCPU;
     bool ballLaunched;
+    bool brickCPULimit;
+    
 }
 @end
 
@@ -136,15 +138,16 @@ public:
             circle.m_radius = BALL_RADIUS;
             b2FixtureDef circleFixtureDef;
             circleFixtureDef.shape = &circle;
-            circleFixtureDef.density = 1.0f;
+            circleFixtureDef.density = 0.5f;
             circleFixtureDef.friction = 0.0f;
-            circleFixtureDef.restitution = 1.2f;
+            circleFixtureDef.restitution = 1.0f;
             theBall->CreateFixture(&circleFixtureDef);
         }
         
         totalElapsedTime = 0;
         ballHitBrick = false;
         ballHitBrickCPU = false;
+        brickCPULimit = false;
         ballLaunched = false;
         
     }
@@ -166,6 +169,31 @@ public:
     //  and if so, use ApplyLinearImpulse() and SetActive(true)
     
     b2Vec2 ballPos = theBall->GetPosition();
+    b2Vec2 brickCPUPos = theBrickCPU->GetPosition();
+    b2Vec2 brickCPUVel = theBrickCPU->GetLinearVelocity();
+    
+    if (brickCPUPos.y >= 550 && brickCPULimit == false){
+        printf("Reach BrickCPUPos TOP IF \n");
+        theBrickCPU->SetLinearVelocity(b2Vec2(0,-BALL_VELOCITY));
+        brickCPULimit = true;
+    }
+    
+    if (brickCPUPos.y <= 50 && brickCPULimit == true){
+        printf("Reach BrickCPUPos IF \n");
+        theBrickCPU->SetLinearVelocity(b2Vec2(0,BALL_VELOCITY));
+        theBrickCPU->SetAngularVelocity(0);
+        brickCPULimit = false;    }
+    
+    if (brickCPUVel.x == 0 && brickCPUVel.y == 0 ) {
+        if(brickCPULimit == false) {
+            theBrickCPU->SetLinearVelocity(b2Vec2(0,BALL_VELOCITY));
+        }
+        if(brickCPULimit == true) {
+            theBrickCPU->SetLinearVelocity(b2Vec2(0,-BALL_VELOCITY));
+        }
+    }
+    
+    
     
     if (ballLaunched){
         theBall->ApplyLinearImpulse(b2Vec2(BALL_VELOCITY,0), theBall->GetPosition(), true);
