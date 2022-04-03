@@ -40,6 +40,7 @@
 -(void) Update:(float)elapsedTime;  // update the Box2D engine
 -(void) RegisterHit; // Register when the ball hits the brick
 -(void) RegisterHitCPU; // When Ball hits CPU Brick
+-(void) movePlayerWall:(float)transY;
 -(void *)GetObjectPositions;        // Get the positions of the ball and brick
 
 @end

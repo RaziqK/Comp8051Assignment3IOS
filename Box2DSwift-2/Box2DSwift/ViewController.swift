@@ -34,6 +34,9 @@ class ViewController: GLKViewController {
         let singleTap = UITapGestureRecognizer(target: self, action: #selector(self.doSingleTap(_:)))
         singleTap.numberOfTapsRequired = 1
         view.addGestureRecognizer(singleTap)
+        
+        let singlePan = UIPanGestureRecognizer(target: self, action: #selector(self.doSinglePan(_ :)))
+        view.addGestureRecognizer(singlePan)
     }
     
     override func glkView(_ view: GLKView, drawIn rect: CGRect) {
@@ -42,6 +45,12 @@ class ViewController: GLKViewController {
     
     @objc func doSingleTap(_ sender: UITapGestureRecognizer) {
         glesRenderer.box2d.launchBall()
+    }
+    
+    @objc func doSinglePan(_ sender: UIPanGestureRecognizer) {
+        let translation = sender.translation(in: view)
+        let transY = Float(translation.y)
+        glesRenderer.box2d.movePlayerWall(transY)
     }
 
 }

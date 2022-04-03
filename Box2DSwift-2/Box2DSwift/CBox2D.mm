@@ -93,7 +93,7 @@ public:
         
         if (theBrick) {
             theBrick->SetUserData((__bridge void *)self);
-            theBrick->SetAwake(false);
+            theBrick->SetAwake(true);
             b2PolygonShape dynamicBox;
             dynamicBox.SetAsBox(BRICK_WIDTH/2, BRICK_HEIGHT/2);
             b2FixtureDef fixtureDef;
@@ -112,7 +112,7 @@ public:
         theBrickCPU = world->CreateBody(&brickCpuBodyDef);
         if (theBrickCPU ) {
             theBrickCPU->SetUserData((__bridge void *)self);
-            theBrickCPU->SetAwake(false);
+            theBrickCPU->SetAwake(true);
             b2PolygonShape dynamicBox;
             dynamicBox.SetAsBox(BRICK_CPU_WIDTH/2, BRICK_CPU_HEIGHT/2);
             b2FixtureDef fixtureDef;
@@ -169,21 +169,25 @@ public:
     //  and if so, use ApplyLinearImpulse() and SetActive(true)
     
     b2Vec2 ballPos = theBall->GetPosition();
+    b2Vec2 ballVel = theBall->GetLinearVelocity();
+    b2Vec2 brickPos = theBrick->GetPosition();
     b2Vec2 brickCPUPos = theBrickCPU->GetPosition();
     b2Vec2 brickCPUVel = theBrickCPU->GetLinearVelocity();
     
+    int randomAngle = arc4random_uniform(10);
+
     if (brickCPUPos.y >= 550 && brickCPULimit == false){
-        printf("Reach BrickCPUPos TOP IF \n");
+        //printf("Reach BrickCPUPos TOP IF \n");
         theBrickCPU->SetLinearVelocity(b2Vec2(0,-BALL_VELOCITY));
         brickCPULimit = true;
     }
-    
+
     if (brickCPUPos.y <= 50 && brickCPULimit == true){
-        printf("Reach BrickCPUPos IF \n");
+        //printf("Reach BrickCPUPos IF \n");
         theBrickCPU->SetLinearVelocity(b2Vec2(0,BALL_VELOCITY));
         theBrickCPU->SetAngularVelocity(0);
         brickCPULimit = false;    }
-    
+
     if (brickCPUVel.x == 0 && brickCPUVel.y == 0 ) {
         if(brickCPULimit == false) {
             theBrickCPU->SetLinearVelocity(b2Vec2(0,BALL_VELOCITY));
@@ -193,11 +197,23 @@ public:
         }
     }
     
+    if (ballPos.y > 550) {
+        printf("Hit Ceiling \n");
+        theBall->SetLinearVelocity(b2Vec2(0, -BALL_VELOCITY));
+    }
+    
+    if (ballPos.y < 20) {
+        printf("hit Floor \n");
+        theBall->SetLinearVelocity(b2Vec2(0 , BALL_VELOCITY));
+    }
+
     
     
     if (ballLaunched){
-        theBall->ApplyLinearImpulse(b2Vec2(BALL_VELOCITY,0), theBall->GetPosition(), true);
+        theBall->ApplyLinearImpulse(b2Vec2(-BALL_VELOCITY,0), theBall->GetPosition(), true);
         theBall->SetActive(true);
+        theBrick->SetActive(true);
+        theBrickCPU->SetActive(true);
         
 #ifdef LOG_TO_CONSOLE
     NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
@@ -208,38 +224,90 @@ public:
     // Check if it is time yet to drop the brick, and if so
     //  call SetAwake()
     totalElapsedTime += elapsedTime;
-    if ((totalElapsedTime > BRICK_WAIT) && theBrick)
+    if ((totalElapsedTime > BRICK_WAIT) && theBrick) {
         theBrick->SetAwake(true);
+    theBrickCPU->SetAwake(true);
+        
+    }
+     
     
     // If the last collision test was positive,
     //  stop the ball and destroy the brick
-    if (ballHitBrick && ballPos.x < 700)
+//    if (ballHitBrick && ballPos.x < 300)
+//    {
+//        printf("First Brick Hit \n");
+//        theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, 0));
+//        theBall->SetAngularVelocity(0);
+//        theBrick->SetLinearVelocity(b2Vec2(0,0));
+//        theBrick->SetAngularVelocity(0);
+//        theBrick->SetTransform(b2Vec2(BRICK_POS_X, brickPos.y), 0);
+//        //theBall->SetActive(false);
+//        //world->DestroyBody(theBrick);
+//        //theBrick = NULL;
+//        ballHitBrick = false;
+//        ballHitBrickCPU = false;
+//    }
+//
+//    if (ballHitBrickCPU && ballPos.x > 500)
+//    {
+//        printf("Ball Hit BrickCPU \n");
+//        theBall->SetLinearVelocity(b2Vec2(-BALL_VELOCITY, 0));
+//        theBall->SetAngularVelocity(0);
+//        theBrickCPU->SetLinearVelocity(b2Vec2(0,0));
+//        theBrickCPU->SetAngularVelocity(0);
+//        theBrickCPU->SetTransform(b2Vec2(BRICK_CPU_POS_X, brickCPUPos.y), 0);
+//        //theBall->SetActive(false);
+//        //world->DestroyBody(theBrick);
+//        //theBrick = NULL;
+//        ballHitBrickCPU = false;
+//        ballHitBrick = false;
+//    }
+    
+    if (ballHitBrick && ballVel.x > 0)
     {
-        printf("First Brick Hit \n");
+        printf("Ball Hit Brick \n");
         theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, 0));
         theBall->SetAngularVelocity(0);
         theBrick->SetLinearVelocity(b2Vec2(0,0));
         theBrick->SetAngularVelocity(0);
-        //theBall->SetActive(false);
-        //world->DestroyBody(theBrick);
-        //theBrick = NULL;
-        ballHitBrick = false;
-        ballHitBrickCPU = false;
-    }
-    
-    if (ballHitBrickCPU && ballPos.x > 100)
-    {
-        printf("Ball Hit BrickCPU \n");
-        theBall->SetLinearVelocity(b2Vec2(-BALL_VELOCITY, 0));
-        theBall->SetAngularVelocity(0);
+        theBrick->SetTransform(b2Vec2(BRICK_POS_X, brickPos.y), 0);
         theBrickCPU->SetLinearVelocity(b2Vec2(0,0));
         theBrickCPU->SetAngularVelocity(0);
+        theBrickCPU->SetTransform(b2Vec2(BRICK_CPU_POS_X, brickCPUPos.y), 0);        //theBall->SetActive(false);
+        //world->DestroyBody(theBrick);
+        //theBrick = NULL;
+       // ballHitBrickCPU = false;
+        ballHitBrick = false;
+    }
+    
+    if (ballHitBrick && ballVel.x < 0)
+    {
+        printf("Ball Hit Brick CPU\n");
+        theBall->SetLinearVelocity(b2Vec2(-BALL_VELOCITY, 0));
+        theBall->SetAngularVelocity(0);
+        theBrick->SetLinearVelocity(b2Vec2(0,0));
+        theBrick->SetAngularVelocity(0);
+        theBrick->SetTransform(b2Vec2(BRICK_POS_X, brickPos.y), 0); theBrickCPU->SetLinearVelocity(b2Vec2(0,0));
+        theBrickCPU->SetAngularVelocity(0);
+        theBrickCPU->SetTransform(b2Vec2(BRICK_CPU_POS_X, brickCPUPos.y), 0);
         //theBall->SetActive(false);
         //world->DestroyBody(theBrick);
         //theBrick = NULL;
-        ballHitBrickCPU = false;
+        //ballHitBrickCPU = false;
         ballHitBrick = false;
     }
+    
+    //printf("BallhitBrick: %d \n" , ballHitBrick);
+    //printf("BallhitBrick: %d \n" , ballHitBrickCPU);
+
+    if (brickPos.y <= 50) {
+        theBrick->SetTransform(b2Vec2(BRICK_POS_X, 50), 0);
+    }
+
+    if (brickPos.y >= 550) {
+        theBrick->SetTransform(b2Vec2(BRICK_POS_X, 550), 0);
+    }
+
     if (world)
     {
         while (elapsedTime >= MAX_TIMESTEP)
@@ -259,12 +327,20 @@ public:
 {
     // Set some flag here for processing later...
     ballHitBrick = true;
-    ballHitBrickCPU = true;
+    //ballHitBrickCPU = true;
 }
 
 -(void)RegisterHitCPU
 {
     // Flag for processing
+}
+
+-(void)movePlayerWall: (float) transY
+{
+    b2Vec2 brickPos = theBrick->GetPosition();
+    
+    
+    theBrick->SetTransform(b2Vec2(BRICK_POS_X, brickPos.y-transY), 0);
 }
 
 -(void)LaunchBall
