@@ -49,7 +49,7 @@ class ViewController: GLKViewController {
     
     @objc func doSinglePan(_ sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: view)
-        let transY = Float(translation.y)
+        let transY = Float(translation.x)
         glesRenderer.box2d.movePlayerWall(transY)
     }
 
