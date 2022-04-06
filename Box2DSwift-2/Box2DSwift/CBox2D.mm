@@ -75,7 +75,6 @@ public:
 {
     playerScore = 0;
     CPUScore = 0;
-    gameStart = false;
     self = [super init];
     if (self) {
         // Initialize Box2D
@@ -156,7 +155,8 @@ public:
         ballHitBrickCPU = false;
         brickCPULimit = false;
         ballLaunched = false;
-        
+        gameStart = false;
+
     }
     return self;
 }
@@ -238,21 +238,23 @@ public:
             theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, BALL_VELOCITY));
         }
     }
-
-    
-    if (ballLaunched){
-            theBall->ApplyLinearImpulse(b2Vec2(BALL_VELOCITY,-BALL_VELOCITY), theBall->GetPosition(), true);
-            theBall->SetActive(true);
-            theBrick->SetActive(true);
-            theBrickCPU->SetActive(true);
-            
-    #ifdef LOG_TO_CONSOLE
-        NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
-    #endif
-        ballLaunched = false;
-            gameStart = true;
-            
+    if (gameStart == false) {
+        if (ballLaunched){
+                theBall->ApplyLinearImpulse(b2Vec2(BALL_VELOCITY,-BALL_VELOCITY), theBall->GetPosition(), true);
+                theBall->SetActive(true);
+                theBrick->SetActive(true);
+                theBrickCPU->SetActive(true);
+                
+        #ifdef LOG_TO_CONSOLE
+            NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
+        #endif
+            ballLaunched = false;
+                gameStart = true;
+                
+            }
+        
         }
+
     
     
     // Check if it is time yet to drop the brick, and if so
@@ -397,7 +399,6 @@ public:
 {
     // Set some flag here for processing later...
     ballLaunched = true;
-    gameStart = true;
 }
 
 -(void *)GetObjectPositions
