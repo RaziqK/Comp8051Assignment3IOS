@@ -32,7 +32,10 @@
 #define BALL_SPHERE_SEGS    128
 
 
-@interface CBox2D : NSObject 
+@interface CBox2D : NSObject
+
+@property int playerScore;
+@property int CPUScore;
 
 -(void) HelloWorld; // Basic Hello World! example from Box2D
 
@@ -41,6 +44,7 @@
 -(void) RegisterHit; // Register when the ball hits the brick
 -(void) RegisterHitCPU; // When Ball hits CPU Brick
 -(void) movePlayerWall:(float)transY;
+-(void) PlayerScored:(float)playerScore;
 -(void *)GetObjectPositions;        // Get the positions of the ball and brick
 
 @end

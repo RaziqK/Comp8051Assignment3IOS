@@ -60,6 +60,7 @@ public:
     bool ballHitBrick;
     bool ballHitBrickCPU;
     bool ballLaunched;
+    bool gameStart;
     bool brickCPULimit;
     
 }
@@ -67,8 +68,14 @@ public:
 
 @implementation CBox2D
 
+@synthesize playerScore;
+@synthesize CPUScore;
+
 - (instancetype)init
 {
+    playerScore = 0;
+    CPUScore = 0;
+    gameStart = false;
     self = [super init];
     if (self) {
         // Initialize Box2D
@@ -174,7 +181,19 @@ public:
     b2Vec2 brickCPUPos = theBrickCPU->GetPosition();
     b2Vec2 brickCPUVel = theBrickCPU->GetLinearVelocity();
     
-    int randomAngle = arc4random_uniform(10);
+    //int randomAngle = arc4random_uniform(10);
+    
+    if (ballPos.y < -50) {
+        CPUScore += 1;
+        theBall->SetTransform(b2Vec2(BALL_POS_X,BALL_POS_Y), 0);
+    }
+    if (ballPos.y > 600) {
+        printf("Player Scored");
+        playerScore += 1;
+        //theBall->SetTransform(b2Vec2(0,0), 0);
+        theBall->SetTransform(b2Vec2(BALL_POS_X,BALL_POS_Y), 0);
+        
+    }
 
     if (brickCPUPos.x >= 750 && brickCPULimit == false){
         //printf("Reach BrickCPUPos TOP IF \n");
@@ -212,23 +231,30 @@ public:
     
     if (ballPos.x < 0) {
         printf("hit Left Wall \n");
-        theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, ballVel.y));
+        if (ballVel.y < 0) {
+            theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, -BALL_VELOCITY));
+        }
+        if (ballVel.y > 0) {
+            theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, BALL_VELOCITY));
+        }
     }
 
     
-    
     if (ballLaunched){
-        theBall->ApplyLinearImpulse(b2Vec2(BALL_VELOCITY,-BALL_VELOCITY), theBall->GetPosition(), true);
-        theBall->SetActive(true);
-        theBrick->SetActive(true);
-        theBrickCPU->SetActive(true);
-        
-#ifdef LOG_TO_CONSOLE
-    NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
-#endif
-    ballLaunched = false;
-        
-    }
+            theBall->ApplyLinearImpulse(b2Vec2(BALL_VELOCITY,-BALL_VELOCITY), theBall->GetPosition(), true);
+            theBall->SetActive(true);
+            theBrick->SetActive(true);
+            theBrickCPU->SetActive(true);
+            
+    #ifdef LOG_TO_CONSOLE
+        NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
+    #endif
+        ballLaunched = false;
+            gameStart = true;
+            
+        }
+    
+    
     // Check if it is time yet to drop the brick, and if so
     //  call SetAwake()
     totalElapsedTime += elapsedTime;
@@ -300,10 +326,10 @@ public:
     if (ballHitBrick && ballVel.y < 0)
     {
         if (ballVel.x < 0) {
-            theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, -BALL_VELOCITY));
+            theBall->SetLinearVelocity(b2Vec2(-BALL_VELOCITY, -BALL_VELOCITY));
             theBall->SetAngularVelocity(0);         }
         if (ballVel.x > 0) {
-            theBall->SetLinearVelocity(b2Vec2(-BALL_VELOCITY, -BALL_VELOCITY));
+            theBall->SetLinearVelocity(b2Vec2(BALL_VELOCITY, -BALL_VELOCITY));
             theBall->SetAngularVelocity(0);
             
         }
@@ -371,6 +397,7 @@ public:
 {
     // Set some flag here for processing later...
     ballLaunched = true;
+    gameStart = true;
 }
 
 -(void *)GetObjectPositions
